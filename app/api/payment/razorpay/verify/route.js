@@ -12,6 +12,10 @@ import { sendOrderConfirmationEmail } from '@/lib/mailer';
 
 export async function POST(request) {
     try {
+        if (!process.env.RAZORPAY_KEY_SECRET) {
+            return NextResponse.json({ success: false, message: 'Razorpay secret is missing. Please configure it in .env.local and restart the server.' });
+        }
+
         const { userId } = getAuth(request);
         if (!userId) return NextResponse.json({ success: false, message: 'Unauthorized' });
 

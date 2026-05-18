@@ -5,12 +5,14 @@ import { Toaster } from "react-hot-toast";
 import { ClerkProvider } from "@clerk/nextjs";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import SplashScreen from "@/components/SplashScreen";
+import AIChatAssistant from "@/components/AIChatAssistant";
 
 const outfit = Outfit({ subsets: ['latin'], weight: ["300", "400", "500"] })
 
 export const metadata = {
-  title: "NextCart - Vittal",
-  description: "E-Commerce with Next.js ",
+  title: "NextCart | Premium E-Commerce Experience",
+  description: "Discover a wide range of high-quality products with NextCart. Fast shipping, secure payments, and a seamless shopping experience.",
+  keywords: "ecommerce, nextjs, shopping, online store, premium products",
 };
 
 export default function RootLayout({ children }) {
@@ -25,6 +27,7 @@ export default function RootLayout({ children }) {
               <div className="animate-fade-in-up">
                 {children}
               </div>
+              <AIChatAssistant />
             </AppContextProvider>
           </ThemeProvider>
         </body>

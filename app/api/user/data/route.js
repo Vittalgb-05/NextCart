@@ -21,7 +21,8 @@ export async function GET(request) {
                     email: clerkUser.emailAddresses[0].emailAddress,
                     name: (clerkUser.firstName || '') + ' ' + (clerkUser.lastName || ''),
                     imageUrl: clerkUser.imageUrl,
-                    cartItems: {}
+                    cartItems: {},
+                    wishlist: []
                 })
             } else {
                 return NextResponse.json({ success: false, message: "User Not Found" })

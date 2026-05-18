@@ -51,53 +51,113 @@ const OrderSummary = () => {
     return selectedAddress._id;
   };
 
-  const loadRazorpay = () => new Promise((resolve) => {
-    if (window.Razorpay) return resolve(true);
+  useEffect(() => {
+    if (user) fetchUserAddresses();
+    // Load Razorpay script once on mount
     const script = document.createElement('script');
     script.src = 'https://checkout.razorpay.com/v1/checkout.js';
-    script.onload = () => resolve(true);
-    script.onerror = () => resolve(false);
+    script.async = true;
     document.body.appendChild(script);
-  });
+    return () => {
+      if (document.body.contains(script)) {
+        document.body.removeChild(script);
+      }
+    };
+  }, [user]);
 
   const handleRazorpayPayment = async (cartItemsArray, addressId, token) => {
-    const loaded = await loadRazorpay();
-    if (!loaded) { toast.error('Failed to load Razorpay. Please try again.'); return; }
+    try {
+      if (!window.Razorpay) {
+        alert("Razorpay script not loaded yet. Please wait a moment or check your connection.");
+        setIsLoading(false);
+        return;
+      }
 
-    const { data } = await axios.post('/api/payment/razorpay/create-order', { items: cartItemsArray }, { headers: { Authorization: `Bearer ${token}` } });
-    if (!data.success) { toast.error(data.message); return; }
+      console.log("Creating Razorpay order...");
+      let response;
+      try {
+        response = await axios.post('/api/payment/razorpay/create-order', { items: cartItemsArray }, { headers: { Authorization: `Bearer ${token}` } });
+      } catch (axiosError) {
+        const errorMsg = axiosError.response?.data?.message || axiosError.message;
+        alert("Server Error (Create Order): " + errorMsg);
+        setIsLoading(false);
+        return;
+      }
+      
+      const { data } = response;
+      
+      if (!data.success) {
+        alert("Error: " + data.message);
+        setIsLoading(false);
+        return;
+      }
 
-    const options = {
-      key: data.keyId,
-      amount: data.amount,
-      currency: data.currency,
-      name: 'NextCart',
-      description: 'Purchase',
-      order_id: data.razorpayOrderId,
-      handler: async (response) => {
-        try {
-          const verifyRes = await axios.post('/api/payment/razorpay/verify', {
-            ...response,
-            addressId,
-            items: cartItemsArray,
-          }, { headers: { Authorization: `Bearer ${token}` } });
+      console.log("Razorpay Order Data received:", data);
+      
+      // Alert to verify key is reaching client (masked)
+      if (!data.keyId) {
+        alert("Error: keyId is missing from server response!");
+      } else {
+        console.log("Key ID found:", data.keyId.substring(0, 8) + "...");
+      }
 
-          if (verifyRes.data.success) {
-            toast.success('Payment successful! 🎉');
-            setCartItems({});
-            router.push('/order-placed');
-          } else {
-            toast.error(verifyRes.data.message);
+      const options = {
+        key: data.keyId,
+        amount: data.amount,
+        currency: data.currency,
+        name: 'NextCart',
+        description: 'Purchase',
+        order_id: data.razorpayOrderId,
+        handler: async (response) => {
+          console.log("Payment successful, verifying...", response);
+          try {
+            const verifyRes = await axios.post('/api/payment/razorpay/verify', {
+              ...response,
+              addressId,
+              items: cartItemsArray,
+            }, { headers: { Authorization: `Bearer ${token}` } });
+
+            if (verifyRes.data.success) {
+              toast.success('Payment successful! 🎉');
+              setCartItems({});
+              router.push('/order-placed');
+            } else {
+              toast.error(verifyRes.data.message);
+              setIsLoading(false);
+            }
+          } catch (err) {
+            console.error("Verification error:", err);
+            toast.error('Verification failed. Contact support.');
+            setIsLoading(false);
           }
-        } catch { toast.error('Verification failed. Contact support.'); }
-      },
-      prefill: { name: user?.fullName || '', email: user?.primaryEmailAddress?.emailAddress || '' },
-      theme: { color: '#ea580c' },
-      modal: { ondismiss: () => { toast('Payment cancelled.'); setIsLoading(false); } }
-    };
+        },
+        prefill: { name: user?.fullName || '', email: user?.primaryEmailAddress?.emailAddress || '' },
+        theme: { color: '#ea580c' },
+        modal: {
+          ondismiss: () => {
+            console.log("Payment modal dismissed");
+            toast('Payment cancelled.');
+            setIsLoading(false);
+          }
+        }
+      };
 
-    const rzp = new window.Razorpay(options);
-    rzp.open();
+      const rzp = new window.Razorpay(options);
+      
+      rzp.on('payment.failed', function (response){
+        console.error("Payment failed:", response.error);
+        toast.error(response.error.description || "Payment failed");
+        setIsLoading(false);
+      });
+
+      console.log("Opening Razorpay modal...");
+      setIsLoading(false); // Reset loading just before opening so UI is responsive
+      rzp.open();
+    } catch (error) {
+      console.error("Razorpay Error:", error);
+      alert("Razorpay Error: " + error.message);
+      setIsLoading(false);
+    }
   };
 
   const createOrder = async () => {
@@ -119,13 +179,16 @@ const OrderSummary = () => {
           toast.success(data.message);
           setCartItems({});
           router.push('/order-placed');
-        } else toast.error(data.message);
+        } else {
+          toast.error(data.message);
+        }
+        setIsLoading(false);
       }
-    } catch (error) { toast.error(error.message); }
-    finally { setIsLoading(false); }
+    } catch (error) {
+      toast.error(error.message);
+      setIsLoading(false);
+    }
   };
-
-  useEffect(() => { if (user) fetchUserAddresses(); }, [user]);
 
   const subtotal = getCartAmount();
   const discountAmount = Math.floor((subtotal * discountPercent) / 100);

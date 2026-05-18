@@ -20,38 +20,38 @@ export const AppContextProvider = (props) => {
     const { getToken } = useAuth()
 
     const [products, setProducts] = useState([])
+    const [isLoading, setIsLoading] = useState(true)
     const [userData, setUserData] = useState(false)
     const [isSeller, setIsSeller] = useState(false)
     const [cartItems, setCartItems] = useState({})
     const [wishlist, setWishlist] = useState([])
 
-    // Load wishlist from localStorage on client-side mount
-    useEffect(() => {
-        if (typeof window !== 'undefined') {
-            const saved = localStorage.getItem('wishlist');
-            if (saved) {
-                setWishlist(JSON.parse(saved));
+    const toggleWishlist = async (productId) => {
+        if (!user) {
+            return toast('Please login to manage wishlist', { icon: '⚠️' });
+        }
+        try {
+            const token = await getToken();
+            const { data } = await axios.post('/api/user/wishlist', { productId }, { headers: { Authorization: `Bearer ${token}` } });
+            if (data.success) {
+                setWishlist(data.wishlist);
+                if (data.wishlist.includes(productId)) {
+                    toast('Added to Wishlist', { icon: '❤️' });
+                } else {
+                    toast('Removed from Wishlist', { icon: '💔' });
+                }
+            } else {
+                toast.error(data.message);
             }
+        } catch (error) {
+            toast.error(error.message);
         }
-    }, []);
-
-    const toggleWishlist = (productId) => {
-        let updatedWishlist;
-        if (wishlist.includes(productId)) {
-            updatedWishlist = wishlist.filter(id => id !== productId);
-            toast('Removed from Wishlist', { icon: '💔' });
-        } else {
-            updatedWishlist = [...wishlist, productId];
-            toast('Added to Wishlist', { icon: '❤️' });
-        }
-        setWishlist(updatedWishlist);
-        localStorage.setItem('wishlist', JSON.stringify(updatedWishlist));
     };
 
     const fetchProductData = async () => {
         try {
-            
-            const {data} = await axios.get('/api/product/list')
+            setIsLoading(true)
+            const { data } = await axios.get('/api/product/list')
 
             if (data.success) {
                 setProducts(data.products)
@@ -61,6 +61,8 @@ export const AppContextProvider = (props) => {
 
         } catch (error) {
             toast.error(error.message)
+        } finally {
+            setIsLoading(false)
         }
     }
 
@@ -73,6 +75,7 @@ export const AppContextProvider = (props) => {
             if (data.success) {
                 setUserData(data.user)
                 setCartItems(data.user.cartItems)
+                setWishlist(data.user.wishlist || [])
                 
                 if (data.user.role === 'admin' || data.user.role === 'seller' || user.publicMetadata.role === 'seller') {
                     setIsSeller(true)
@@ -89,9 +92,14 @@ export const AppContextProvider = (props) => {
     const addToCart = async (itemId) => {
 
         if (!user) {
-            return toast('Please login',{
-                icon: '⚠️',
-              })
+            return toast('Please login', { icon: '⚠️' })
+        }
+
+        const product = products.find(p => p._id === itemId);
+        const currentQty = cartItems[itemId] || 0;
+
+        if (product && currentQty >= product.stock) {
+            return toast.error(`Only ${product.stock} units available in stock`);
         }
 
         let cartData = structuredClone(cartItems);
@@ -105,7 +113,7 @@ export const AppContextProvider = (props) => {
         if (user) {
             try {
                 const token = await getToken()
-                await axios.post('/api/cart/update', {cartData}, {headers:{Authorization: `Bearer ${token}`}} )
+                await axios.post('/api/cart/update', { cartData }, { headers: { Authorization: `Bearer ${token}` } })
                 toast.success('Item added to cart')
             } catch (error) {
                 toast.error(error.message)
@@ -114,6 +122,11 @@ export const AppContextProvider = (props) => {
     }
 
     const updateCartQuantity = async (itemId, quantity) => {
+
+        const product = products.find(p => p._id === itemId);
+        if (product && quantity > product.stock) {
+            return toast.error(`Only ${product.stock} units available in stock`);
+        }
 
         let cartData = structuredClone(cartItems);
         if (quantity === 0) {
@@ -173,7 +186,8 @@ export const AppContextProvider = (props) => {
         cartItems, setCartItems,
         addToCart, updateCartQuantity,
         getCartCount, getCartAmount,
-        wishlist, toggleWishlist
+        wishlist, toggleWishlist,
+        isLoading
     }
 
     return (

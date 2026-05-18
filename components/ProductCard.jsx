@@ -6,10 +6,9 @@ import { useAppContext } from '@/context/AppContext';
 const ProductCard = ({ product }) => {
     const { currency, router, wishlist, toggleWishlist } = useAppContext();
 
-    // Generate unique, deterministic ratings and reviews count based on product ID/name
-    const rating = (4.0 + (product.name.length % 11) / 10).toFixed(1);
-    const reviewsCount = (product.name.length * 7) % 89 + 12;
-    const starCount = Math.round(parseFloat(rating));
+    const rating = product.averageRating || 0;
+    const reviewsCount = product.reviewCount || 0;
+    const starCount = Math.round(rating);
     
     const isLiked = wishlist ? wishlist.includes(product._id) : false;
 

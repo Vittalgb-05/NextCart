@@ -3,6 +3,7 @@ A high-performance Full-Stack E-Commerce Application built with Next.js.
 
 ## 🌟 Features
 * **Modern UI/UX**: Native-app style splash screen and smooth entry animations.
+* **Intelligent Conversational AI Assistant**: Typo-tolerant, context-aware chatbot powered by Groq (LLaMA3) with automatic self-healing memory, dynamic intent routing (greetings, specs details, buying), and premium interactive product cards with direct Add-to-Cart and Details navigation.
 * **Dark/Light Mode**: Full theme toggling using Tailwind CSS and `next-themes`.
 * **User Authentication**: Secure social and passwordless login powered by Clerk.
 * **Product Catalog**: Dynamic product listings, details pages, and intelligent search filtering.
@@ -13,10 +14,11 @@ A high-performance Full-Stack E-Commerce Application built with Next.js.
 
 ## 🛠️ Technology Stack
 * **Frontend**: Next.js 14, React 18, Tailwind CSS
-* **Backend**: Node.js, Next.js API Routes
+* **Backend**: Node.js, Next.js API Routes, Vercel AI SDK
 * **Database**: MongoDB (with Mongoose)
 * **Authentication**: Clerk
 * **Email Service**: Nodemailer
+* **AI Model Engine**: Groq Cloud API (llama3-70b-8192)
 
 ## 🚀 How to Setup
 
@@ -38,6 +40,9 @@ Create a `.env` file in the root directory and add the following required keys:
 ```env
 # Core Settings
 NEXT_PUBLIC_CURRENCY=₹
+
+# Groq API Key (AI Shopping Assistant)
+GROQ_API_KEY=your_groq_api_key_here
 
 # Clerk Authentication
 NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=your_clerk_publishable_key

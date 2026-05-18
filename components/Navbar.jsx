@@ -9,8 +9,10 @@ import ThemeToggle from "@/components/ThemeToggle";
 
 const Navbar = () => {
 
-  const { isSeller, router, user, wishlist } = useAppContext();
+  const { isSeller, userData, router, user, wishlist, products } = useAppContext();
   const { openSignIn } = useClerk()
+
+  const activeWishlist = wishlist ? wishlist.filter(id => products.some(p => p._id === id)) : [];
 
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -61,7 +63,7 @@ const Navbar = () => {
           Contact
         </Link>
 
-        {isSeller && <button onClick={() => router.push('/seller')} className="text-xs border px-4 py-1.5 rounded-full">Seller Dashboard</button>}
+        {user && (userData?.role === 'admin' || userData?.role === 'seller') && <button onClick={() => router.push('/seller')} className="text-xs border px-4 py-1.5 rounded-full">Seller Dashboard</button>}
 
       </div>
 
@@ -93,9 +95,9 @@ const Navbar = () => {
           <svg className="w-5 h-5 text-gray-600 hover:text-red-500 transition fill-none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
             <path d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
           </svg>
-          {wishlist && wishlist.length > 0 && (
+          {activeWishlist.length > 0 && (
             <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[8px] font-bold rounded-full w-4 h-4 flex items-center justify-center shadow-md animate-bounce">
-              {wishlist.length}
+              {activeWishlist.length}
             </span>
           )}
         </div>
@@ -121,7 +123,7 @@ const Navbar = () => {
 
       <div className="flex items-center md:hidden gap-3">
         <ThemeToggle />
-        {isSeller && <button onClick={() => router.push('/seller')} className="text-xs border px-4 py-1.5 rounded-full">Seller Dashboard</button>}
+        {user && (userData?.role === 'admin' || userData?.role === 'seller') && <button onClick={() => router.push('/seller')} className="text-xs border px-4 py-1.5 rounded-full">Seller Dashboard</button>}
         {
           user
             ? <>

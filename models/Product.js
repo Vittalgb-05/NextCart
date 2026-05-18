@@ -9,6 +9,8 @@ const productSchema = new mongoose.Schema({
     image: { type: Array, required: true },
     category: { type: String, required: true },
     stock: { type: Number, required: true, default: 10 },
+    averageRating: { type: Number, default: 0 },
+    reviewCount: { type: Number, default: 0 },
     date: { type: Number, required: true }
 })
 
