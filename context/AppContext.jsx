@@ -67,17 +67,16 @@ export const AppContextProvider = (props) => {
     const fetchUserData = async () => {
         try {
 
-            if (user.publicMetadata.role === 'seller') {
-                setIsSeller(true)
-            }
-
             const token = await getToken()
-
             const { data } = await axios.get('/api/user/data', { headers: { Authorization: `Bearer ${token}` } })
 
             if (data.success) {
                 setUserData(data.user)
                 setCartItems(data.user.cartItems)
+                
+                if (data.user.role === 'admin' || data.user.role === 'seller' || user.publicMetadata.role === 'seller') {
+                    setIsSeller(true)
+                }
             } else {
                 toast.error(data.message)
             }

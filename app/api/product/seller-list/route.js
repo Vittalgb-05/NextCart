@@ -9,7 +9,7 @@ export async function GET(request) {
         
         const { userId } = getAuth(request)
 
-        const isSeller = authSeller(userId)
+        const isSeller = await authSeller(userId)
 
         if (!isSeller) {
             return NextResponse.json({ success: false, message: 'not authorized' });
