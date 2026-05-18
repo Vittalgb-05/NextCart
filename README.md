@@ -2,6 +2,11 @@
 A high-performance Full-Stack E-Commerce Application built with Next.js.
 
 ## 🌟 Features
+* **Full-Featured Admin Dashboard**: A dedicated, secure administrative panel allowing you to:
+  * **Product Management**: Add, edit, and delete products (Complete CRUD).
+  * **Order Fulfillment**: Track, update, and manage customer orders.
+  * **User Management**: Oversee registered users and permissions.
+  * **Inventory Control**: Track and manage live stock levels.
 * **Modern UI/UX**: Native-app style splash screen and smooth entry animations.
 * **Dark/Light Mode**: Full theme toggling using Tailwind CSS and `next-themes`.
 * **User Authentication**: Secure social and passwordless login powered by Clerk.
