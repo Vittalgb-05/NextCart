@@ -35,6 +35,9 @@ npm install
 ### 3. Environment Variables
 Create a `.env` file in the root directory and add the following required keys:
 ```env
+# Core Settings
+NEXT_PUBLIC_CURRENCY=₹
+
 # Clerk Authentication
 NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=your_clerk_publishable_key
 CLERK_SECRET_KEY=your_clerk_secret_key
@@ -42,9 +45,25 @@ CLERK_SECRET_KEY=your_clerk_secret_key
 # MongoDB Database
 MONGODB_URI=your_mongodb_connection_string
 
-# Nodemailer Email (Gmail App Password)
-EMAIL_USER=your_email@gmail.com
-EMAIL_PASS=your_gmail_app_password
+# Inngest Setup (Background Jobs)
+INNGEST_SIGNING_KEY=your_inngest_signing_key
+INNGEST_EVENT_KEY=your_inngest_event_key
+
+# Cloudinary (Image Hosting)
+CLOUDINARY_CLOUD_NAME=your_cloudinary_name
+CLOUDINARY_API_KEY=your_cloudinary_api_key
+CLOUDINARY_API_SECRET=your_cloudinary_api_secret
+
+# Store Contact Info
+NEXT_PUBLIC_CONTACT_PHONE=your_store_phone
+NEXT_PUBLIC_CONTACT_EMAIL=your_store_email
+
+# Automated Email Settings (SMTP via Nodemailer)
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_SECURE=false
+SMTP_USER=your_email@gmail.com
+SMTP_PASS=your_gmail_app_password
 ```
 
 ### 4. Run the Development Server
