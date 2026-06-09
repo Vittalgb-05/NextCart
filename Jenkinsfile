@@ -3,6 +3,12 @@ pipeline {
 
     stages {
 
+        stage('Show Workspace') {
+            steps {
+                bat 'dir'
+            }
+        }
+
         stage('Install Dependencies') {
             steps {
                 bat 'npm install'
@@ -17,6 +23,12 @@ pipeline {
             }
         }
 
+        stage('Verify Environment') {
+            steps {
+                bat 'if exist .env (echo .env found) else (echo .env NOT found)'
+            }
+        }
+
         stage('Build Next.js App') {
             steps {
                 bat 'npm run build'
@@ -28,7 +40,6 @@ pipeline {
                 bat 'docker build -t nextcart .'
             }
         }
-
     }
 
     post {
