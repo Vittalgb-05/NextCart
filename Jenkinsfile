@@ -3,12 +3,6 @@ pipeline {
 
     stages {
 
-        stage('Clone Repository') {
-            steps {
-                git 'https://github.com/Vittalgb-05/NextCart.git'
-            }
-        }
-
         stage('Install Dependencies') {
             steps {
                 bat 'npm install'
