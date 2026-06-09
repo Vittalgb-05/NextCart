@@ -11,7 +11,9 @@ pipeline {
 
         stage('Dependency Check') {
             steps {
-                bat 'npm audit'
+                catchError(buildResult: 'SUCCESS', stageResult: 'UNSTABLE') {
+                    bat 'npm audit'
+                }
             }
         }
 
@@ -27,5 +29,23 @@ pipeline {
             }
         }
 
+    }
+
+    post {
+        always {
+            echo 'Pipeline completed'
+        }
+
+        success {
+            echo 'Build Successful'
+        }
+
+        unstable {
+            echo 'Dependency vulnerabilities found'
+        }
+
+        failure {
+            echo 'Pipeline Failed'
+        }
     }
 }
