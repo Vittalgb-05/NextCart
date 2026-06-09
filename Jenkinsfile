@@ -23,6 +23,22 @@ pipeline {
             }
         }
 
+        stage('Code Quality Check') {
+            steps {
+                script {
+                    def scannerHome = tool 'SonarScanner'
+                    withSonarQubeEnv('SonarQube') {
+                        bat """
+                        ${scannerHome}\\bin\\sonar-scanner.bat ^
+                        -Dsonar.projectKey=NextCart ^
+                        -Dsonar.projectName=NextCart ^
+                        -Dsonar.sources=.
+                        """
+                    }
+                }
+            }
+        }
+
         stage('Verify Environment') {
             steps {
                 bat 'if exist .env (echo .env found) else (echo .env NOT found)'
