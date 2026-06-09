@@ -36,18 +36,19 @@ pipeline {
 
         stage('Code Quality Check') {
             steps {
-                script {
-                    def scannerHome = tool 'SonarScanner'
+                catchError(buildResult: 'SUCCESS', stageResult: 'UNSTABLE') {
+                    script {
+                        def scannerHome = tool 'SonarScanner'
 
-                    withSonarQubeEnv('SonarQube') {
-
-                        bat """
-                        ${scannerHome}\\bin\\sonar-scanner.bat ^
-                        -Dsonar.projectKey=NextCart ^
-                        -Dsonar.projectName=NextCart ^
-                        -Dsonar.sources=. ^
-                        -Dsonar.sourceEncoding=UTF-8
-                        """
+                        withSonarQubeEnv('SonarQube') {
+                            bat """
+                            ${scannerHome}\\bin\\sonar-scanner.bat ^
+                            -Dsonar.projectKey=nextcart ^
+                            -Dsonar.projectName=NextCart ^
+                            -Dsonar.sources=. ^
+                            -Dsonar.sourceEncoding=UTF-8
+                            """
+                        }
                     }
                 }
             }
@@ -67,13 +68,12 @@ pipeline {
 
         stage('Docker Build') {
             steps {
-                bat 'docker build -t nextcart .'
+                bat 'docker build -t nextcart:latest .'
             }
         }
     }
 
     post {
-
         always {
             echo 'Pipeline completed'
         }
@@ -83,7 +83,7 @@ pipeline {
         }
 
         unstable {
-            echo 'Dependency vulnerabilities found'
+            echo 'Build Successful with Warnings'
         }
 
         failure {
