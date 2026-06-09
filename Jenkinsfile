@@ -1,6 +1,10 @@
 pipeline {
     agent any
 
+    tools {
+        jdk 'JDK21'
+    }
+
     stages {
 
         stage('Show Workspace') {
@@ -23,16 +27,26 @@ pipeline {
             }
         }
 
+        stage('Check Java') {
+            steps {
+                bat 'java -version'
+                bat 'echo JAVA_HOME=%JAVA_HOME%'
+            }
+        }
+
         stage('Code Quality Check') {
             steps {
                 script {
                     def scannerHome = tool 'SonarScanner'
+
                     withSonarQubeEnv('SonarQube') {
+
                         bat """
                         ${scannerHome}\\bin\\sonar-scanner.bat ^
                         -Dsonar.projectKey=NextCart ^
                         -Dsonar.projectName=NextCart ^
-                        -Dsonar.sources=.
+                        -Dsonar.sources=. ^
+                        -Dsonar.sourceEncoding=UTF-8
                         """
                     }
                 }
@@ -59,6 +73,7 @@ pipeline {
     }
 
     post {
+
         always {
             echo 'Pipeline completed'
         }
